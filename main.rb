@@ -14,7 +14,7 @@ username = ENV["INSTAPAPER_USERNAME"]
 password = ENV["INSTAPAPER_PASSWORD"]
 rss_feed_urls = ENV["RSS_FEED_URLS"].split(",")
 
-scheduler.every "1m" do
+scheduler.every "5m" do
   rss_feed_urls.each do |feed_url|
     open(feed_url) do |rss|
       feed = RSS::Parser.parse(rss)
