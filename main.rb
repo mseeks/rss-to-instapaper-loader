@@ -20,7 +20,11 @@ scheduler.every "5m" do
       feed = RSS::Parser.parse(rss)
 
       feed.items.each do |feed_item|
-        title = feed_item.title.content
+        title = if feed_item.title.is_a?(String)
+          feed_item.title
+        else
+          feed_item.title.content
+        end
         url = feed_item.link.href
 
         file_path = File.join(Dir.pwd, "data", "urls.log")
