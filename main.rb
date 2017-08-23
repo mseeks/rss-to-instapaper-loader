@@ -25,7 +25,12 @@ scheduler.every "5m" do
         else
           feed_item.title.content
         end
-        url = feed_item.link.href
+
+        url = if feed_item.link.is_a?(String)
+          feed_item.link
+        else
+          feed_item.link.href
+        end
 
         file_path = File.join(Dir.pwd, "data", "urls.log")
         is_already_bookmarked = File.open(file_path, "rb").read.include?(url)
