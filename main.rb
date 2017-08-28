@@ -17,28 +17,32 @@ rss_feed_urls = ENV["RSS_FEED_URLS"].split(",")
 scheduler.every "5m" do
   rss_feed_urls.each do |feed_url|
     open(feed_url) do |rss|
-      feed = RSS::Parser.parse(rss)
+      begin
+        feed = RSS::Parser.parse(rss, false)
 
-      feed.items.each do |feed_item|
-        title = feed_item.title.content
-        url = feed_item.link.href
+        feed.items.each do |feed_item|
+          title = feed_item.title.content
+          url = feed_item.link.href
 
-        file_path = File.join(Dir.pwd, "data", "urls.log")
-        is_already_bookmarked = File.open(file_path, "rb").read.include?(url)
+          file_path = File.join(Dir.pwd, "data", "urls.log")
+          is_already_bookmarked = File.open(file_path, "rb").read.include?(url)
 
-        unless is_already_bookmarked
-          RestClient.post(
-            add_endpoint,
-            {
-              username: username,
-              password: password,
-              url: url,
-              title: title
-            }
-          )
+          unless is_already_bookmarked
+            RestClient.post(
+              add_endpoint,
+              {
+                username: username,
+                password: password,
+                url: url,
+                title: title
+              }
+            )
 
-          `echo '#{url}' >> #{file_path}`
+            `echo '#{url}' >> #{file_path}`
+          end
         end
+      rescue => e
+        puts "Could not process #{feed_url}. An error of type #{e.class} happened, message is #{e.message}"
       end
     end
   end
