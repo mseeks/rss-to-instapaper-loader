@@ -18,11 +18,20 @@ scheduler.every "5m" do
   rss_feed_urls.each do |feed_url|
     open(feed_url) do |rss|
       begin
-        feed = RSS::Parser.parse(rss, false)
+        feed = RSS::Parser.parse(rss)
 
         feed.items.each do |feed_item|
-          title = feed_item.title.content
-          url = feed_item.link.href
+          title = if feed_item.title.is_a?(String)
+            feed_item.title
+          else
+            feed_item.title.content
+          end
+
+          url = if feed_item.link.is_a?(String)
+            feed_item.link
+          else
+            feed_item.link.href
+          end
 
           file_path = File.join(Dir.pwd, "data", "urls.log")
           is_already_bookmarked = File.open(file_path, "rb").read.include?(url)
